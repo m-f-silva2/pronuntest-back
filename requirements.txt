@@ -1,9 +1,9 @@
 #tensorflow==2.14.0
 
-tensorflow
-pyinstaller
+#tensorflow
+#pyinstaller
 librosa
 #keras
 Flask
-gunicorn
+#gunicorn
 #uWSGI
