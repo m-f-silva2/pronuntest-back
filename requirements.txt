@@ -3,7 +3,7 @@
 tensorflow==2.14.0
 pyinstaller
 librosa
-keras
+#keras
 Flask
 gunicorn
 #uWSGI
