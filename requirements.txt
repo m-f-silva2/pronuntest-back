@@ -8,4 +8,4 @@ Flask
 #gunicorn
 #uWSGI
 
-scipy
+soundfile
