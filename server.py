@@ -72,7 +72,7 @@ def validate_phoneme_pattern(pattern: str):
 
 @app.route('/')
 def home():
-    return "Running"
+    return "Running app"
 
 
 if __name__ == "__main__":
