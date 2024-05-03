@@ -5,5 +5,5 @@
 librosa
 #keras
 Flask
-#gunicorn
+gunicorn
 #uWSGI
