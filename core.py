@@ -12,7 +12,11 @@ TARGET_SAMPLES = int(SAMPLE_RATE * 0.2)  # one second worth of audio
 HOP_LENGTH = 128  # sliding window for FFT. Measured in number of samples
 N_FFT = 255  # length of the windowed signal after padding with zeros
 
-phonemes = ["a", "e", "i", "noise", "o", "u"]
+phonemes = [
+    "a", "e", "i", "noise", "o", "u", 
+    "pa", "pe", "pi", "po", "pu", 
+    "papa", "papá", "pelo"
+    ]
 pronuns = ["correct", "incorrect", "noise"]
 
 def read_audio_segments(file):
@@ -61,7 +65,8 @@ class PhonemeRecognitionService:
     def __new__(cls):
         if cls._instance is None:
             cls._instance = super().__new__(cls)
-            cls._instance._model = load_model("./models/phoneme_model.h5")
+            """cls._instance._model = load_model("./models/phoneme_model.h5")"""
+            cls._instance._model = load_model("./models/phoneme_model.keras")
         return cls._instance
 
     def predict(self, spectrograms: np.ndarray):
