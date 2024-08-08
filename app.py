@@ -1,8 +1,8 @@
-#from core import convert_audio_to_spectrograms, PhonemeRecognitionService
+from core import convert_audio_to_spectrograms, PhonemeRecognitionService
 from flask import Flask, request, jsonify
 
 app = Flask(__name__)
-"""model = PhonemeRecognitionService()
+model = PhonemeRecognitionService()
 
 
 @app.route("/api/", methods=["POST"])
@@ -69,7 +69,7 @@ def validate_phoneme_pattern(pattern: str):
     result = {"word": pattern, "score": average, "phonemes": predicted}
     
     return jsonify(result)
-"""
+
 @app.route('/')
 def home():
     return "Running app"
