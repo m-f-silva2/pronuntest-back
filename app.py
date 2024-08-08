@@ -79,8 +79,8 @@ def home():
 
 if __name__ == "__main__":
     # pyinstaller --onefile --console --clean server.py --name "backend"
-    #spectrograms = convert_audio_to_spectrograms("./models/recording.wav")
-    #model.predict(spectrograms)
+    spectrograms = convert_audio_to_spectrograms("./models/recording.wav")
+    model.predict(spectrograms)
     
 
     # version app
