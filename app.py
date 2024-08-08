@@ -32,45 +32,56 @@ def most_frequent_phoneme():
 @app.route("/api/word/<pattern>", methods=["POST"])
 def validate_phoneme_pattern(pattern: str):
     recording = request.files["recording"]
-    spectrograms = convert_audio_to_spectrograms(recording)
-    predictions = model.predict(spectrograms)
+    print(f"Received file: {recording.filename}")
+    print(f"File type: {recording.content_type}")
+
+    # Guarda el archivo temporalmente para inspeccionarlo
+    recording.save("/tmp/test_recording.wav")
+    print("File saved to /tmp/test_recording.wav")
     
-    phoneme = None
-    percentage = 0.0
-    phonemes = []
+    try:
+        spectrograms = convert_audio_to_spectrograms(recording)
+        predictions = model.predict(spectrograms)
+        
+        phoneme = None
+        percentage = 0.0
+        phonemes = []
 
-    for prediction in predictions:
-        if prediction["class"] == phoneme:
-            if prediction["percentage"] > percentage:
-                percentage = prediction["percentage"]
-                phonemes[-1]["percentage"] = prediction["percentage"]
-            continue
+        for prediction in predictions:
+            if prediction["class"] == phoneme:
+                if prediction["percentage"] > percentage:
+                    percentage = prediction["percentage"]
+                    phonemes[-1]["percentage"] = prediction["percentage"]
+                continue
 
-        phoneme = prediction["class"]
-        percentage = prediction["percentage"]
-        phonemes.append(prediction)
+            phoneme = prediction["class"]
+            percentage = prediction["percentage"]
+            phonemes.append(prediction)
 
-    start_pattern = None
-    phonemes = list(filter(lambda pred: pred["class"] != "noise", phonemes))
+        start_pattern = None
+        phonemes = list(filter(lambda pred: pred["class"] != "noise", phonemes))
 
-    for i, phoneme in enumerate(phonemes):
-        if phoneme["class"] == pattern[0]:
-            start_pattern = i
-            break
+        for i, phoneme in enumerate(phonemes):
+            if phoneme["class"] == pattern[0]:
+                start_pattern = i
+                break
 
-    if start_pattern == None:
-        result = {"word": pattern, "score": 0, "phonemes": []}
+        if start_pattern == None:
+            result = {"word": pattern, "score": 0, "phonemes": []}
+            return jsonify(result)
+
+        default_phoneme = {"class": "unknown", "percentage": 0.0}
+        predicted = phonemes[start_pattern : start_pattern + len(pattern)]
+        predicted = predicted + [default_phoneme] * (len(pattern) - len(predicted))
+
+        total_percentage = sum(phoneme["percentage"] for phoneme in predicted)
+        average = total_percentage / len(predicted) if len(predicted) > 0 else 0
+        result = {"word": pattern, "score": average, "phonemes": predicted}
+        
         return jsonify(result)
-
-    default_phoneme = {"class": "unknown", "percentage": 0.0}
-    predicted = phonemes[start_pattern : start_pattern + len(pattern)]
-    predicted = predicted + [default_phoneme] * (len(pattern) - len(predicted))
-
-    total_percentage = sum(phoneme["percentage"] for phoneme in predicted)
-    average = total_percentage / len(predicted) if len(predicted) > 0 else 0
-    result = {"word": pattern, "score": average, "phonemes": predicted}
-    
-    return jsonify(result)
+    except Exception as e:
+            print(f"Error while processing the file: {e}")
+            return jsonify({"error": str(e)}), 400
 
 @app.route('/')
 def home():
