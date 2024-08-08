@@ -81,7 +81,7 @@ def validate_phoneme_pattern(pattern: str):
         return jsonify(result)
     except Exception as e:
             print(f"Error while processing the file: {e}")
-            return jsonify({"error": str(e)}), 400
+            return jsonify({"error": str(e+" ||file type:"+recording.content_type)}), 400
 
 @app.route('/')
 def home():
