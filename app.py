@@ -1,7 +1,9 @@
 from core import convert_audio_to_spectrograms, PhonemeRecognitionService
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app, resources={r"/*": {"origins": "*"}})
 model = PhonemeRecognitionService()
 
 
