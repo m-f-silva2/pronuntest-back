@@ -2,8 +2,8 @@
 
 #tensorflow
 #pyinstaller
-#librosa
-keras
+librosa
+#keras
 Flask
 #gunicorn
 #uWSGI
