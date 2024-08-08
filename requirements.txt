@@ -2,7 +2,7 @@
 
 #tensorflow
 #pyinstaller
-librosa
+#librosa
 #keras
 Flask
 #gunicorn
