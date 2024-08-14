@@ -51,16 +51,6 @@ def validate_phoneme_pattern(pattern: str):
     print("-------  ----")    
 
 
-    # Mostrar los archivos que llegaron
-    
-    for filename, file in request.files.items():
-        print("--3-----  ----")
-        
-        print(f"File received - Name: {filename}, Filename: {file.filename}, Content-Type: {file.content_type}")
-        print("-------  ----")
-
-    # Puedes guardar el archivo para inspeccionarlo si es necesario
-    file.save(f"/tmp/{file.filename}")
 
     recording = request.files["recording"]
     spectrograms = convert_audio_to_spectrograms(recording)
