@@ -7,5 +7,7 @@ keras
 Flask
 flask-cors
 numpy==1.26.4
+bytesbufio
+soundfile
 #gunicorn
 #uWSGI

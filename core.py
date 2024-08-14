@@ -58,7 +58,6 @@ def get_pred_percentage(logits: np.ndarray) -> np.float32:
     max_probability = np.max(probabilities, axis=-1)
     return round(max_probability * 100, 1)
 
-
 class PhonemeRecognitionService:
     _instance = None
 
