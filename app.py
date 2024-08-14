@@ -38,20 +38,6 @@ def validate_phoneme_pattern(pattern: str):
     print("Headers:", request.headers)
     print("-------  ----")
 
-    # Mostrar los datos JSON si los hay
-    print("JSON Content:", request.json)
-    print("-------  ----")
-
-    # Mostrar los formularios si los hay
-    print("Form Data:", request.form)
-    print("-------  ----")
-
-    # Mostrar el contenido de la solicitud
-    print("Content (raw):", request.data.decode('utf-8'))
-    print("-------  ----")    
-
-
-
     recording = request.files["recording"]
     spectrograms = convert_audio_to_spectrograms(recording)
     predictions = model.predict(spectrograms)
