@@ -34,6 +34,34 @@ def most_frequent_phoneme():
 
 @app.route("/api/word/<pattern>", methods=["POST"])
 def validate_phoneme_pattern(pattern: str):
+    # Mostrar los headers
+    print("Headers:", request.headers)
+    print("-------  ----")
+
+    # Mostrar los datos JSON si los hay
+    print("JSON Content:", request.json)
+    print("-------  ----")
+
+    # Mostrar los formularios si los hay
+    print("Form Data:", request.form)
+    print("-------  ----")
+
+    # Mostrar el contenido de la solicitud
+    print("Content (raw):", request.data.decode('utf-8'))
+    print("-------  ----")    
+
+
+    # Mostrar los archivos que llegaron
+    
+    for filename, file in request.files.items():
+        print("--3-----  ----")
+        
+        print(f"File received - Name: {filename}, Filename: {file.filename}, Content-Type: {file.content_type}")
+        print("-------  ----")
+
+    # Puedes guardar el archivo para inspeccionarlo si es necesario
+    file.save(f"/tmp/{file.filename}")
+
     recording = request.files["recording"]
     spectrograms = convert_audio_to_spectrograms(recording)
     predictions = model.predict(spectrograms)
