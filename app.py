@@ -40,7 +40,7 @@ def validate_phoneme_pattern(pattern: str):
     # Convertir el objeto a una cadena JSON
     mi_objeto_json = json.dumps(request, indent=4)
 
-    print(mi_objeto_json)
+    print("--- REQUEST:", mi_objeto_json)
 
     recording = request.files["recording"]
     spectrograms = convert_audio_to_spectrograms(recording)
