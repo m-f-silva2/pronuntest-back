@@ -35,7 +35,7 @@ def most_frequent_phoneme():
 @app.route("/api/word/<pattern>", methods=["POST"])
 def validate_phoneme_pattern(pattern: str):
     # Mostrar los headers
-    print("Headers:", request.headers)
+    print("Headers:", request)
     print("-------  ----")
 
     recording = request.files["recording"]
