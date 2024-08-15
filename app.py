@@ -35,8 +35,6 @@ def most_frequent_phoneme():
 
 @app.route("/api/word/<pattern>", methods=["POST"])
 def validate_phoneme_pattern(pattern: str):
-    # Mostrar los headers
-
     # Convertir el objeto a una cadena JSON
     mi_objeto_json = json.dumps(request, indent=4)
 
