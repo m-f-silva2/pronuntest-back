@@ -4,6 +4,7 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from io import BytesIO
 import soundfile as sf
+import json
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"Access-Control-Allow-Origins": "*"}})
@@ -35,8 +36,11 @@ def most_frequent_phoneme():
 @app.route("/api/word/<pattern>", methods=["POST"])
 def validate_phoneme_pattern(pattern: str):
     # Mostrar los headers
-    print("Headers:", request)
-    print("-------  ----")
+
+    # Convertir el objeto a una cadena JSON
+    mi_objeto_json = json.dumps(request, indent=4)
+
+    print(mi_objeto_json)
 
     recording = request.files["recording"]
     spectrograms = convert_audio_to_spectrograms(recording)
