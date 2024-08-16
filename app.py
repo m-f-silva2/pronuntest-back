@@ -28,15 +28,8 @@ def most_frequent_phoneme():
     )
 
 @app.route("/api/word/<pattern>", methods=["POST"])
-def validate_phoneme_pattern(pattern: str):
-    if 'recording' not in request.files:
-        return "No file part", 400
-    
+def validate_phoneme_pattern(pattern: str):    
     recording = request.files['recording']
-    
-    if recording.filename == '':
-        return "No selected file", 400
-
     # Guardar temporalmente el archivo para inspeccionarlo
     temp_file_path = "test_recording.wav"
     recording.save(temp_file_path)
