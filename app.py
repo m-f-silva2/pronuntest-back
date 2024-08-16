@@ -1,4 +1,4 @@
-from core import convert_audio_to_spectrograms, PhonemeRecognitionService, read_audio
+from core import convert_audio_to_spectrograms, PhonemeRecognitionService
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 
