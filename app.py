@@ -1,15 +1,10 @@
-import wave
-from core import convert_audio_to_spectrograms, PhonemeRecognitionService
+from core import convert_audio_to_spectrograms, PhonemeRecognitionService, read_audio
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from io import BytesIO
-import soundfile as sf
-import json
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"Access-Control-Allow-Origins": "*"}})
 model = PhonemeRecognitionService()
-
 
 @app.route("/api/", methods=["POST"])
 def most_frequent_phoneme():
@@ -32,18 +27,21 @@ def most_frequent_phoneme():
         }
     )
 
-
 @app.route("/api/word/<pattern>", methods=["POST"])
 def validate_phoneme_pattern(pattern: str):
-    # Convertir el objeto a una cadena JSON
-    mi_objeto_json = json.dumps(request, indent=4)
+    if 'recording' not in request.files:
+        return "No file part", 400
+    
+    recording = request.files['recording']
+    
+    if recording.filename == '':
+        return "No selected file", 400
 
-    print("--- REQUEST:", mi_objeto_json)
-
-    recording = request.files["recording"]
-    spectrograms = convert_audio_to_spectrograms(recording)
+    # Guardar temporalmente el archivo para inspeccionarlo
+    temp_file_path = "test_recording.wav"
+    recording.save(temp_file_path)
+    spectrograms = convert_audio_to_spectrograms(temp_file_path)
     predictions = model.predict(spectrograms)
-
     phoneme = None
     percentage = 0.0
     phonemes = []
@@ -80,10 +78,6 @@ def validate_phoneme_pattern(pattern: str):
     result = {"word": pattern, "score": average, "phonemes": predicted}
 
     return jsonify(result)
-
-def is_valid_wav(file):
-    mime = magic.Magic(mime=True)
-    return mime.from_buffer(file.read(1024), mime=True) == 'audio/wav'
     
 
 @app.route('/')
