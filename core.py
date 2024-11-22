@@ -7,10 +7,10 @@ from keras.models import load_model
 import numpy as np
 import librosa
 
-SAMPLE_RATE = 22050 #16000 #22050  # frequency with which instants of the audio signal
+SAMPLE_RATE = 44100 #16000 #22050  # frequency with which instants of the audio signal
 TARGET_SAMPLES = int(SAMPLE_RATE * 0.3)  #0.2 one second worth of audio
-HOP_LENGTH = 256 #128  # sliding window for FFT. Measured in number of samples
-N_FFT = 512 #256  # length of the windowed signal after padding with zeros
+HOP_LENGTH = 128 #128  # sliding window for FFT. Measured in number of samples
+N_FFT = 255 #256  # length of the windowed signal after padding with zeros
 
 """phonemes = [
     "a", "e", "i", "noise", "o", "u", 
