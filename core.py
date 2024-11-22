@@ -7,15 +7,21 @@ from keras.models import load_model
 import numpy as np
 import librosa
 
-SAMPLE_RATE = 22050  # frequency with which instants of the audio signal
-TARGET_SAMPLES = int(SAMPLE_RATE * 0.2)  # one second worth of audio
-HOP_LENGTH = 128  # sliding window for FFT. Measured in number of samples
-N_FFT = 255  # length of the windowed signal after padding with zeros
+SAMPLE_RATE = 22050 #16000 #22050  # frequency with which instants of the audio signal
+TARGET_SAMPLES = int(SAMPLE_RATE * 0.3)  #0.2 one second worth of audio
+HOP_LENGTH = 256 #128  # sliding window for FFT. Measured in number of samples
+N_FFT = 512 #256  # length of the windowed signal after padding with zeros
 
-phonemes = [
+"""phonemes = [
     "a", "e", "i", "noise", "o", "u", 
     "pa", "pe", "pi", "po", "pu", 
-    "papa", "papá", "pelo"
+    "papa", "pelo", "pie", "Palo", "pila", 
+    "pollo", "lupa", "pulpo", "mapa", "pino", "pan"
+    ]"""
+phonemes = [
+    "noise","pa", "pe", "pi", "po", "pu", 
+    "papa", "pelo", "pie", "Palo", "pila", 
+    "pollo", "lupa", "pulpo", "mapa", "pino", "pan"
     ]
 pronuns = ["correct", "incorrect", "noise"]
 
@@ -65,7 +71,7 @@ class PhonemeRecognitionService:
         if cls._instance is None:
             cls._instance = super().__new__(cls)
             """cls._instance._model = load_model("./models/phoneme_model.h5")"""
-            cls._instance._model = load_model("./models/phoneme_model.h5")
+            cls._instance._model = load_model("./models/phoneme_model.keras")
         return cls._instance
 
     def predict(self, spectrograms: np.ndarray):

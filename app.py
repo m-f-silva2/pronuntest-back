@@ -1,6 +1,7 @@
 from core import convert_audio_to_spectrograms, PhonemeRecognitionService
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+import os
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"Access-Control-Allow-Origins": "*"}})
@@ -28,19 +29,21 @@ def most_frequent_phoneme():
     )
 
 @app.route("/api/word/<pattern>", methods=["POST"])
-def validate_phoneme_pattern(pattern: str):
-    if 'recording' not in request.files:
-        return "No file part", 400
-    
+def validate_phoneme_pattern(pattern: str):    
     recording = request.files['recording']
-    
-    if recording.filename == '':
-        return "No selected file", 400
-
     # Guardar temporalmente el archivo para inspeccionarlo
     temp_file_path = "test_recording.wav"
     recording.save(temp_file_path)
-    spectrograms = convert_audio_to_spectrograms(temp_file_path)
+
+    try:
+        # Procesar el archivo
+        spectrograms = convert_audio_to_spectrograms(temp_file_path)
+    finally:
+        # Eliminar el archivo temporal
+        if os.path.exists(temp_file_path):
+            os.remove(temp_file_path)
+            print(f"Archivo temporal {temp_file_path} eliminado.")
+
     predictions = model.predict(spectrograms)
     phoneme = None
     percentage = 0.0
