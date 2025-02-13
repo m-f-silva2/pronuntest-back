@@ -71,39 +71,14 @@ class PhonemeRecognitionService:
     def __new__(cls):
         if cls._instance is None:
             cls._instance = super().__new__(cls)
-            """cls._instance._model = load_model("./models/phoneme_model.h5")"""
-            cls._instance._model = load_model("./models/phoneme_vocal_model.h5")
+            cls._instance._model_vocal = load_model("./models/phoneme_vocal_model.h5")
+            cls._instance._model_p = load_model("./models/phoneme_vocal_model.h5")
         return cls._instance
 
     def predict(self, spectrograms: np.ndarray, type_model: str):
-        if(type_model == "vocal"):
-            print("--------model vocal-------")
-            SAMPLE_RATE = 16000 #16000 #22050 ##44100  # frequency with which instants of the audio signal
-            DURATION = 1.0  # 0.2 one second worth of audio - Duración objetivo del audio en segundos. Puedes ajustar según la longitud promedio de las palabras en tu dataset.
-            TARGET_SAMPLES = int(SAMPLE_RATE * DURATION)  # Número de muestras objetivo.
-            HOP_LENGTH = 256 #256 #128  # sliding window for FFT. Measured in number of samples
-            N_FFT = 256 #256  # length of the windowed signal after padding with zeros
-            self._model = load_model("./models/phoneme_vocal_model.h5") # type: ignore
-        else:
-            print("--------model p-------")
-            SAMPLE_RATE = 16000 #16000 #22050 ##44100  # frequency with which instants of the audio signal
-            DURATION = 1.0  # 0.2 one second worth of audio - Duración objetivo del audio en segundos. Puedes ajustar según la longitud promedio de las palabras en tu dataset.
-            TARGET_SAMPLES = int(SAMPLE_RATE * DURATION)  # Número de muestras objetivo.
-            HOP_LENGTH = 256 #256 #128  # sliding window for FFT. Measured in number of samples
-            N_FFT = 256 #256  # length of the windowed signal after padding with zeros
-            self._model = load_model("./models/phoneme_p_model.h5") # type: ignore
-        
-        predicts = self._model.predict(spectrograms, verbose=0)
-        recording = []
-
-        for logits in predicts:
-            percentage = get_pred_percentage(logits)
-            predicted_class = phonemes[np.argmax(logits)]
-            recording.append(
-                {
-                    "class": predicted_class,
-                    "percentage": percentage,
-                }
-            )
-
-        return recording
+        model = self._model_vocal if type_model == "vocal" else self._model_p
+        predicts = model.predict(spectrograms, verbose=0)
+        return [
+            {"class": phonemes[np.argmax(logits)], "percentage": get_pred_percentage(logits)}
+            for logits in predicts
+        ]

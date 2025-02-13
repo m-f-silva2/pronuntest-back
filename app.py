@@ -1,3 +1,4 @@
+import tempfile
 from core import convert_audio_to_spectrograms, PhonemeRecognitionService
 from flask import Flask, request, jsonify
 from flask_cors import CORS
@@ -44,29 +45,13 @@ def process_audio(file_path):
 @app.route("/api/word/<pattern>", methods=["POST"])
 def validate_phoneme_pattern(pattern: str):   
     recording = request.files['recording']
-    # Guardar temporalmente el archivo para inspeccionarlo
-    temp_file_path = "test_recording.wav"
-    recording.save(temp_file_path)
-    processed_audio, sample_rate = process_audio(temp_file_path)
 
-    # Guardar el audio procesado en un nuevo archivo
-    processed_file_path = "processed_recording.wav"
-    sf.write(processed_file_path, processed_audio, sample_rate)
-    print(f"Processed audio saved at: {processed_file_path}")
+    with tempfile.NamedTemporaryFile(suffix=".wav", delete=True) as temp_file:
+        recording.save(temp_file.name)
+        #processed_audio, sample_rate = process_audio(temp_file.name)
 
-    try:
-        # Procesar el archivo
-        spectrograms = convert_audio_to_spectrograms(processed_file_path)
-    finally:
-        # Eliminar el archivo temporal
-        if os.path.exists(processed_file_path):
-            #os.remove(processed_file_path)
-            print(f"Archivo temporal {processed_file_path} eliminado.")
-    
-    if(pattern in ["a", "e", "i", "o", "u"]):
-        type_model = 'vocal'
-
-    predictions = model.predict(spectrograms, type_model)
+        spectrograms = convert_audio_to_spectrograms(temp_file.name)
+        predictions = model.predict(spectrograms, type_model)
     phoneme = None
     percentage = 0.0
     phonemes = []
@@ -127,4 +112,5 @@ if __name__ == "__main__":
     #app.run(port=5000, debug=False, host="0.0.0.0")
 
     # deploy production
-    app.run(debug=False, host="0.0.0.0")
+    #app.run(debug=False, host="0.0.0.0")
+    print("Ejecuta con Gunicorn: gunicorn -w 2 -t 60 -b 0.0.0.0:5000 app:app")
