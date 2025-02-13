@@ -7,9 +7,13 @@ import os
 import soundfile as sf
 
 app = Flask(__name__)
-CORS(app, resources={r"/*": {"Access-Control-Allow-Origins": "*"}})
+#CORS(app, resources={r"/*": {"Access-Control-Allow-Origins": "*"}})
+CORS(app, resources={r"/*": {"origins": "*"}})
 model = PhonemeRecognitionService()
 type_model = 'vocal'
+
+@app.route("/api/test", methods=["GET"])
+
 
 @app.route("/api/", methods=["POST"])
 def most_frequent_phoneme():
