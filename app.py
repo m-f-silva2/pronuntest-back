@@ -100,5 +100,5 @@ if __name__ == "__main__":
     #app.run(port=5000, debug=False, host="0.0.0.0")
 
     # deploy production
-    #app.run(debug=False, host="0.0.0.0")
-    print("Ejecuta con Gunicorn: gunicorn -w 2 -t 60 -b 0.0.0.0:5000 app:app")
+    app.run(debug=False, host="0.0.0.0")
+    #print("Ejecuta con Gunicorn: gunicorn -w 2 -t 60 -b 0.0.0.0:5000 app:app")
