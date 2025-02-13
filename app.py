@@ -24,7 +24,7 @@ def most_frequent_phoneme():
     phonemes = list(filter(lambda pred: pred["class"] != "noise", preds))
     preds = phonemes if len(phonemes) > 0 else preds
     phoneme = max(preds, key=lambda x: x["percentage"])
-    print("fonema:",phoneme)
+    print("fonema:",phoneme, flush=True)
     return jsonify(
         {
             "pronunciation": "correct",
