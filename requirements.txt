@@ -11,5 +11,5 @@ numpy==1.26.4
 #soundfile
 #pydub
 #ffmpeg-python
-#gunicorn
+gunicorn
 #uWSGI
