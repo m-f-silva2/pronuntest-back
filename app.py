@@ -179,6 +179,12 @@ def validate_phoneme_pattern(pattern: str):
 def test():
     return jsonify({"word": "pattern", "score": 0, "phonemes": []})
 
+
+@app.route('/test/', methods=["OPTIONS"])
+def options():
+    return '', 200
+
+
 @app.route('/')
 def home():
     return "Running app"
