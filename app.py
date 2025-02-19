@@ -8,12 +8,10 @@ import soundfile as sf
 
 app = Flask(__name__)
 #CORS(app, resources={r"/*": {"Access-Control-Allow-Origins": "*"}})
-CORS(app, resources={r"/*": {"origins": "*"}})
+#CORS(app, resources={r"/*": {"origins": "*"}})
+CORS(app, supports_credentials=True, resources={r"/*": {"origins": "*"}})
 model = PhonemeRecognitionService()
 type_model = 'vocal'
-
-@app.route("/api/test", methods=["GET"])
-
 
 @app.route("/api/", methods=["POST"])
 def most_frequent_phoneme():
@@ -51,16 +49,29 @@ def validate_phoneme_pattern(pattern: str):
     recording = request.files['recording']
     type_model = 'vocal' if pattern in ["a", "e", "i", "o", "u"] else 'p'
 
-    with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as temp_file:
-        temp_path = temp_file.name
-        recording.save(temp_path)  # Guardar el archivo antes de cerrarlo
-
+    # Guardar temporalmente el archivo para inspeccionarlo
+    temp_file_path = "test_recording.wav"
+    recording.save(temp_file_path)
+    processed_audio, sample_rate = process_audio(temp_file_path)
+    # Guardar el audio procesado en un nuevo archivo
+    processed_file_path = "processed_recording.wav"
+    sf.write(processed_file_path, processed_audio, sample_rate)
+    print(f"Processed audio saved at: {processed_file_path}")
     try:
-        spectrograms = convert_audio_to_spectrograms(temp_path)
-        predictions = model.predict(spectrograms, type_model)
+        # Procesar el archivo
+        spectrograms = convert_audio_to_spectrograms(processed_file_path)
     finally:
-        os.remove(temp_path)  # Eliminar el archivo después de usarlo
+        # Eliminar el archivo temporal
+        if os.path.exists(processed_file_path):
+            #os.remove(processed_file_path)
+            print(f"Archivo temporal {processed_file_path} eliminado.")
+    
+    if(pattern in ["a", "e", "i", "o", "u"]):
+        type_model = 'vocal'
 
+    predictions = model.predict(spectrograms, type_model)
+    phoneme = None
+    percentage = 0.0
     phonemes = []
     for prediction in predictions:
         if phonemes and prediction["class"] == phonemes[-1]["class"]:
@@ -82,6 +93,73 @@ def validate_phoneme_pattern(pattern: str):
     average = total_percentage / len(predicted) if predicted else 0
 
     return jsonify({"word": pattern, "score": average, "phonemes": predicted})
+"""
+def validate_phoneme_pattern(pattern: str):   
+    recording = request.files['recording']
+    # Guardar temporalmente el archivo para inspeccionarlo
+    temp_file_path = "test_recording.wav"
+    recording.save(temp_file_path)
+    processed_audio, sample_rate = process_audio(temp_file_path)
+
+    # Guardar el audio procesado en un nuevo archivo
+    processed_file_path = "processed_recording.wav"
+    sf.write(processed_file_path, processed_audio, sample_rate)
+    print(f"Processed audio saved at: {processed_file_path}")
+
+    try:
+        # Procesar el archivo
+        spectrograms = convert_audio_to_spectrograms(processed_file_path)
+    finally:
+        # Eliminar el archivo temporal
+        if os.path.exists(processed_file_path):
+            #os.remove(processed_file_path)
+            print(f"Archivo temporal {processed_file_path} eliminado.")
+    
+    if(pattern in ["a", "e", "i", "o", "u"]):
+        type_model = 'vocal'
+
+    predictions = model.predict(spectrograms, type_model)
+    phoneme = None
+    percentage = 0.0
+    phonemes = []
+
+    for prediction in predictions:
+        if prediction["class"] == phoneme:
+            if prediction["percentage"] > percentage:
+                percentage = prediction["percentage"]
+                phonemes[-1]["percentage"] = prediction["percentage"]
+            continue
+
+        phoneme = prediction["class"]
+        percentage = prediction["percentage"]
+        phonemes.append(prediction)
+
+    
+    start_pattern = None
+    phonemes = list(filter(lambda pred: pred["class"] != "noise", phonemes))
+
+    for i, phoneme in enumerate(phonemes):
+        if phoneme["class"] == pattern[0]:
+            start_pattern = i
+            break
+    print("phonemes",phonemes)
+    print("estar",start_pattern," fonema:", pattern)
+    print("phoneme:",phoneme)
+
+    if start_pattern == None:
+        result = {"word": pattern, "score": 0, "phonemes": []}
+        return jsonify(result)
+
+    default_phoneme = {"class": "unknown", "percentage": 0.0}
+    predicted = phonemes[start_pattern : start_pattern + len(pattern)]
+    predicted = predicted + [default_phoneme] * (len(pattern) - len(predicted))
+
+    total_percentage = sum(phoneme["percentage"] for phoneme in predicted)
+    average = total_percentage / len(predicted) if len(predicted) > 0 else 0
+    result = {"word": pattern, "score": average, "phonemes": predicted}
+
+    return jsonify(result)
+"""
 
 
     
