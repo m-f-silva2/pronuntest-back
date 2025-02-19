@@ -9,7 +9,7 @@ import soundfile as sf
 app = Flask(__name__)
 #CORS(app, resources={r"/*": {"Access-Control-Allow-Origins": "*"}})
 #CORS(app, resources={r"/*": {"origins": "*"}})
-CORS(app, supports_credentials=True, resources={r"/*": {"origins": "*"}})
+CORS(app, supports_credentials=True, resources={r"/*": {"origins": "*"}}, headers="*")
 model = PhonemeRecognitionService()
 type_model = 'vocal'
 
@@ -165,7 +165,7 @@ def validate_phoneme_pattern(pattern: str):
     
 @app.route('/test/', methods=["POST"])
 def test():
-    return jsonify("Running app test")
+    return jsonify({"word": "pattern", "score": 0, "phonemes": []})
 
 @app.route('/')
 def home():
