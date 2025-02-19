@@ -163,6 +163,9 @@ def validate_phoneme_pattern(pattern: str):
 
 
     
+@app.route('/test/', methods=["POST"])
+def test():
+    return jsonify("Running app test")
 
 @app.route('/')
 def home():
