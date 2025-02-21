@@ -5,6 +5,7 @@ os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 
 from keras.models import load_model
 import numpy as np
+import tensorflow as tf
 import librosa
 import logging
 import gc
@@ -72,49 +73,33 @@ def get_pred_percentage(logits: np.ndarray) -> np.float32:
 
 class PhonemeRecognitionService:
     _instance = None
-    _model_vocal = None
-    _model_p = None
 
     def __new__(cls):
         if cls._instance is None:
             cls._instance = super().__new__(cls)
         return cls._instance
 
-    def load_model(self, type_model: str):
-        """Carga el modelo solo si no está en memoria."""
-        if type_model == "vocal":
-            if self._model_vocal is None:
-                logging.info("Cargando modelo vocal...")
-                try:
-                    self._model_vocal = load_model("./models/phoneme_vocal_model.h5")
-                except Exception as e:
-                    logging.error(f"Error al cargar el modelo vocal: {e}")
-                    return None
-            return self._model_vocal
-        else:
-            if self._model_p is None:
-                logging.info("Cargando modelo de fonema 'p'...")
-                try:
-                    self._model_p = load_model("./models/phoneme_p_model.h5")
-                except Exception as e:
-                    logging.error(f"Error al cargar el modelo de fonema 'p': {e}")
-                    return None
-            return self._model_p
-
     def predict(self, spectrograms: np.ndarray, type_model: str):
-        """Realiza la predicción y libera memoria después de usar el modelo."""
-        model = self.load_model(type_model)
-        if model is None:
+        """Carga el modelo, predice y lo elimina para liberar memoria."""
+        model_path = "./models/phoneme_vocal_model.h5" if type_model == "vocal" else "./models/phoneme_p_model.h5"
+
+        try:
+            logging.info(f"Cargando modelo {type_model}...")
+            model = load_model(model_path)
+
+            predicts = model.predict(spectrograms, verbose=0)
+            results = [
+                {"class": phonemes[np.argmax(logits)], "percentage": get_pred_percentage(logits)}
+                for logits in predicts
+            ]
+
+            # Eliminar modelo de memoria
+            del model
+            tf.keras.backend.clear_session()
+            gc.collect()
+
+            return results
+
+        except Exception as e:
+            logging.error(f"Error al cargar el modelo {type_model}: {e}")
             return {"error": "No se pudo cargar el modelo"}
-
-        predicts = model.predict(spectrograms, verbose=0)
-        results = [
-            {"class": phonemes[np.argmax(logits)], "percentage": get_pred_percentage(logits)}
-            for logits in predicts
-        ]
-
-        # Liberar memoria después de la predicción
-        del spectrograms
-        gc.collect()
-
-        return results
