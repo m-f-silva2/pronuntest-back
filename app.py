@@ -182,8 +182,9 @@ def test(pattern: str):
         file = request.files["recording"]
         print("Archivo recibido:", file.filename)
         print("Tipo de archivo:", file.content_type)
-        
-    return jsonify({"word": pattern+" 1", "score": 0, "phonemes": []})
+        return jsonify({"word": pattern+" 1", "score": 0, "phonemes": [], "file": file.filename+" : "+file.content_type})
+
+    return jsonify({"word": pattern+" 1", "score": 0, "phonemes": [], "req":request})
 
 
 @app.route('/test/', methods=["OPTIONS"])
@@ -210,5 +211,7 @@ if __name__ == "__main__":
     #app.run(port=5000, debug=False, host="0.0.0.0")
 
     # deploy production
-    app.run(debug=False, host="0.0.0.0")
+    #app.run(debug=False, host="0.0.0.0")
     #print("Ejecuta con Gunicorn: gunicorn -w 2 -t 60 -b 0.0.0.0:5000 app:app")
+    from waitress import serve  # Alternativa si no quieres usar Gunicorn
+    serve(app, host="0.0.0.0", port=5000)

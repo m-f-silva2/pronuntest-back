@@ -12,4 +12,5 @@ numpy==1.26.4
 #pydub
 #ffmpeg-python
 gunicorn
+waitress
 #uWSGI

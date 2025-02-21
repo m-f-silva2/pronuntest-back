@@ -11,7 +11,7 @@ Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process -Force
 ```
 
 ```bash
-pip install -r .\requirements.txt
+pip install --no-cache-dir -r requirements.txt
 ```
 
 ```bash
