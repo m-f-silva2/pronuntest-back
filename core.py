@@ -6,6 +6,11 @@ os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 from keras.models import load_model
 import numpy as np
 import librosa
+import logging
+import gc
+
+# Configurar logging
+logging.basicConfig(level=logging.INFO)
 
 SAMPLE_RATE = 22050 #16000 #22050 ##44100  # frequency with which instants of the audio signal
 DURATION = 0.2  # 0.2 one second worth of audio - Duración objetivo del audio en segundos. Puedes ajustar según la longitud promedio de las palabras en tu dataset.
@@ -67,18 +72,49 @@ def get_pred_percentage(logits: np.ndarray) -> np.float32:
 
 class PhonemeRecognitionService:
     _instance = None
+    _model_vocal = None
+    _model_p = None
 
     def __new__(cls):
         if cls._instance is None:
             cls._instance = super().__new__(cls)
-            cls._instance._model_vocal = load_model("./models/phoneme_vocal_model.h5")
-            cls._instance._model_p = load_model("./models/phoneme_vocal_model.h5")
         return cls._instance
 
+    def load_model(self, type_model: str):
+        """Carga el modelo solo si no está en memoria."""
+        if type_model == "vocal":
+            if self._model_vocal is None:
+                logging.info("Cargando modelo vocal...")
+                try:
+                    self._model_vocal = load_model("./models/phoneme_vocal_model.h5")
+                except Exception as e:
+                    logging.error(f"Error al cargar el modelo vocal: {e}")
+                    return None
+            return self._model_vocal
+        else:
+            if self._model_p is None:
+                logging.info("Cargando modelo de fonema 'p'...")
+                try:
+                    self._model_p = load_model("./models/phoneme_p_model.h5")
+                except Exception as e:
+                    logging.error(f"Error al cargar el modelo de fonema 'p': {e}")
+                    return None
+            return self._model_p
+
     def predict(self, spectrograms: np.ndarray, type_model: str):
-        model = self._model_vocal if type_model == "vocal" else self._model_p
+        """Realiza la predicción y libera memoria después de usar el modelo."""
+        model = self.load_model(type_model)
+        if model is None:
+            return {"error": "No se pudo cargar el modelo"}
+
         predicts = model.predict(spectrograms, verbose=0)
-        return [
+        results = [
             {"class": phonemes[np.argmax(logits)], "percentage": get_pred_percentage(logits)}
             for logits in predicts
         ]
+
+        # Liberar memoria después de la predicción
+        del spectrograms
+        gc.collect()
+
+        return results
