@@ -178,13 +178,14 @@ def validate_phoneme_pattern(pattern: str):
 @app.route('/test/<pattern>', methods=["POST"])
 def test(pattern: str):
     print("request--> ",request)
+    res={"word": pattern+" 1", "score": 0, "phonemes": [], "val": request}
     if "recording" in request.files:
         file = request.files["recording"]
-        print("Archivo recibido:", file.filename)
-        print("Tipo de archivo:", file.content_type)
-        return jsonify({"word": pattern+" 1", "score": 0, "phonemes": [], "file": file.filename+" : "+file.content_type})
-
-    return jsonify({"word": pattern+" 1", "score": 0, "phonemes": [], "req":request})
+        res["val"] = file.filename+" : "+file.content_type
+        print("res--> ", res)
+        return jsonify(res)
+    print("res--> ", res)
+    return jsonify(res)
 
 
 @app.route('/test/', methods=["OPTIONS"])
