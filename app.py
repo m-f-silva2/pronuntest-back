@@ -67,20 +67,20 @@ def validate_phoneme_pattern(pattern: str):
     with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as temp_file:
         temp_path = temp_file.name
         recording.save(temp_path)
-
+    logging.info("validar fonema #1") 
     try:
         # Ahora sí podemos leerlo sin problemas
         spectrograms = convert_audio_to_spectrograms(temp_path)
         predictions = model.predict(spectrograms, type_model)
     finally:
         os.remove(temp_path)  # Eliminar el archivo después de usarlo
-
+    logging.info("validar fonema #2") 
     phonemes = [p for p in predictions if p["class"] != "noise"]
     start_pattern = next((i for i, p in enumerate(phonemes) if p["class"] == pattern[0]), None)
 
     if start_pattern is None:
         return jsonify({"word": pattern, "score": 0, "phonemes": []})
-
+    logging.info("validar fonema #3") 
     predicted = phonemes[start_pattern : start_pattern + len(pattern)]
     predicted += [{"class": "unknown", "percentage": 0.0}] * (len(pattern) - len(predicted))
 
@@ -88,10 +88,7 @@ def validate_phoneme_pattern(pattern: str):
 
     return jsonify({"word": pattern, "score": average, "phonemes": predicted})
 
-#esta es una peticion de prueba que realiza la app que usa esta api.
-@app.route("/api/word/<pattern>", methods=["OPTIONS"])
-def options(pattern):
-    return '', 200
+
 
 
 """
