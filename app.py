@@ -183,9 +183,9 @@ def test(pattern: str):
         file = request.files["recording"]
         res["val"] = file.filename+" : "+file.content_type
         print("res--> ", res)
-        return jsonify(res)
+        return jsonify({'res': res})
     print("res--> ", res)
-    return jsonify(res)
+    return jsonify({'res': res})
 
 
 @app.route('/test/', methods=["OPTIONS"])
