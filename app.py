@@ -56,6 +56,7 @@ def process_audio(file_path):
 
     return audio, sample_rate
 
+"""
 @app.route("/api/word/<pattern>", methods=["POST"])
 def validate_phoneme_pattern(pattern: str):   
     recording = request.files['recording']
@@ -105,7 +106,9 @@ def validate_phoneme_pattern(pattern: str):
     average = total_percentage / len(predicted) if predicted else 0
 
     return jsonify({"word": pattern, "score": average, "phonemes": predicted})
+
 """
+@app.route("/api/word/<pattern>", methods=["POST"])
 def validate_phoneme_pattern(pattern: str):   
     recording = request.files['recording']
     # Guardar temporalmente el archivo para inspeccionarlo
@@ -171,7 +174,7 @@ def validate_phoneme_pattern(pattern: str):
     result = {"word": pattern, "score": average, "phonemes": predicted}
 
     return jsonify(result)
-"""
+
 
 
     
