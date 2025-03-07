@@ -1,3 +1,4 @@
+import logging
 import tempfile
 from core import convert_audio_to_spectrograms, PhonemeRecognitionService
 from flask import Flask, request, jsonify
@@ -7,7 +8,7 @@ import os
 import soundfile as sf
 
 app = Flask(__name__)
-#CORS(app, resources={r"/*": {"Access-Control-Allow-Origins": "*"}})
+CORS(app, resources={r"/*": {"Access-Control-Allow-Origins": "*"}})
 #CORS(app, resources={r"/*": {"origins": "*"}})
 #CORS(app, supports_credentials=True, resources={r"/*": {"origins": "*"}}, headers="*")
 CORS(app, resources={r"/*": {"origins": "*"}})
@@ -57,7 +58,8 @@ def process_audio(file_path):
     return audio, sample_rate
 
 @app.route("/api/word/<pattern>", methods=["POST"])
-def validate_phoneme_pattern(pattern: str):   
+def validate_phoneme_pattern(pattern: str):  
+    logging.info("validar fonema ", pattern) 
     recording = request.files['recording']
     type_model = 'vocal' if pattern in ["a", "e", "i", "o", "u"] else 'p'
 
