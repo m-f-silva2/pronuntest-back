@@ -10,8 +10,8 @@ import soundfile as sf
 app = Flask(__name__)
 #CORS(app, resources={r"/*": {"Access-Control-Allow-Origins": "*"}})
 #CORS(app, resources={r"/*": {"origins": "*"}})
-#CORS(app, supports_credentials=True, resources={r"/*": {"origins": "*"}}, headers="*")
-CORS(app, resources={r"/*": {"origins": "*"}})
+CORS(app, supports_credentials=True, resources={r"/*": {"origins": "*"}}, headers="*")
+#CORS(app, resources={r"/*": {"origins": "*"}})
 
 @app.after_request
 def add_cors_headers(response):
@@ -20,7 +20,7 @@ def add_cors_headers(response):
     response.headers["Cross-Origin-Opener-Policy"] = "same-origin"
     response.headers["Access-Control-Allow-Origin"] = "*"
     response.headers["Access-Control-Allow-Methods"] = "POST, GET, OPTIONS"
-    response.headers["Access-Control-Allow-Headers"] = "Content-Type"
+    response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
     return response
 
 model = PhonemeRecognitionService()
@@ -88,6 +88,10 @@ def validate_phoneme_pattern(pattern: str):
 
     return jsonify({"word": pattern, "score": average, "phonemes": predicted})
 
+#esta es una peticion de prueba que realiza la app que usa esta api.
+@app.route("/api/word/<pattern>", methods=["OPTIONS"])
+def options(pattern):
+    return '', 200
 
 
 """
@@ -228,7 +232,7 @@ def test(pattern: str):
 @app.route('/test/', methods=["OPTIONS"])
 def options():
     print("requestOPTIONS--> ",request)
-    return '', 200
+    return 'test', 200
 
 
 @app.route('/')
