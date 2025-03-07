@@ -19,7 +19,7 @@ def add_cors_headers(response):
     response.headers["Cross-Origin-Opener-Policy"] = "same-origin"
     response.headers["Access-Control-Allow-Origin"] = "*"
     response.headers["Access-Control-Allow-Methods"] = "POST, GET, OPTIONS"
-    response.headers["Access-Control-Allow-Headers"] = "Content-Type"
+    response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
     return response
 
 model = PhonemeRecognitionService()
@@ -183,9 +183,9 @@ def test(pattern: str):
         file = request.files["recording"]
         res["val"] = file.filename+" : "+file.content_type
         print("res--> ", res)
-        return jsonify(res)
+        return jsonify({"res": pattern})
     print("res--> ", res)
-    return jsonify(res)
+    return jsonify({"res": "res"})
 
 
 @app.route('/test/', methods=["OPTIONS"])
