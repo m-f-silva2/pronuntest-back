@@ -10,7 +10,7 @@ import soundfile as sf
 app = Flask(__name__)
 #CORS(app, resources={r"/*": {"Access-Control-Allow-Origins": "*"}})
 #CORS(app, resources={r"/*": {"origins": "*"}})
-CORS(app, supports_credentials=True, resources={r"/*": {"origins": "*"}}, headers="*")
+CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 #CORS(app, resources={r"/*": {"origins": "*"}})
 
 @app.after_request
