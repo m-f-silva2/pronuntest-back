@@ -1,4 +1,3 @@
-import logging
 import tempfile
 from core import convert_audio_to_spectrograms, PhonemeRecognitionService
 from flask import Flask, request, jsonify
@@ -10,8 +9,8 @@ import soundfile as sf
 app = Flask(__name__)
 #CORS(app, resources={r"/*": {"Access-Control-Allow-Origins": "*"}})
 #CORS(app, resources={r"/*": {"origins": "*"}})
-CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
-#CORS(app, resources={r"/*": {"origins": "*"}})
+#CORS(app, supports_credentials=True, resources={r"/*": {"origins": "*"}}, headers="*")
+CORS(app, resources={r"/*": {"origins": "*"}})
 
 @app.after_request
 def add_cors_headers(response):
@@ -20,7 +19,7 @@ def add_cors_headers(response):
     response.headers["Cross-Origin-Opener-Policy"] = "same-origin"
     response.headers["Access-Control-Allow-Origin"] = "*"
     response.headers["Access-Control-Allow-Methods"] = "POST, GET, OPTIONS"
-    response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
+    response.headers["Access-Control-Allow-Headers"] = "Content-Type"
     return response
 
 model = PhonemeRecognitionService()
@@ -57,61 +56,6 @@ def process_audio(file_path):
 
     return audio, sample_rate
 
-@app.route("/api/word/<pattern>", methods=["POST"])
-def validate_phoneme_pattern(pattern: str):  
-    recording = request.files['recording']
-    type_model = 'vocal' if pattern in ["a", "e", "i", "o", "u"] else 'p'
-
-    # Guardar temporalmente el archivo para inspeccionarlo
-    temp_file_path = "test_recording.wav"
-    recording.save(temp_file_path)
-    processed_audio, sample_rate = process_audio(temp_file_path)
-    # Guardar el audio procesado en un nuevo archivo
-    processed_file_path = "processed_recording.wav"
-    sf.write(processed_file_path, processed_audio, sample_rate)
-    logging.info(f"Processed audio saved at: {processed_file_path}")
-    try:
-        # Procesar el archivo
-        spectrograms = convert_audio_to_spectrograms(processed_file_path)
-    finally:
-        # Eliminar el archivo temporal
-        if os.path.exists(processed_file_path):
-            #os.remove(processed_file_path)
-            logging.info(f"Archivo temporal {processed_file_path} eliminado.")
-    
-    if(pattern in ["a", "e", "i", "o", "u"]):
-        type_model = 'vocal'
-
-    predictions = model.predict(spectrograms, type_model)
-    phoneme = None
-    percentage = 0.0
-    phonemes = []
-    for prediction in predictions:
-        if phonemes and prediction["class"] == phonemes[-1]["class"]:
-            phonemes[-1]["percentage"] = max(phonemes[-1]["percentage"], prediction["percentage"])
-        else:
-            phonemes.append(prediction)
-
-    phonemes = [p for p in phonemes if p["class"] != "noise"]
-    start_pattern = next((i for i, p in enumerate(phonemes) if p["class"] == pattern[0]), None)
-
-    if start_pattern is None:
-        return jsonify({"word": pattern, "score": 0, "phonemes": []})
-
-    default_phoneme = {"class": "unknown", "percentage": 0.0}
-    predicted = phonemes[start_pattern : start_pattern + len(pattern)]
-    predicted += [default_phoneme] * (len(pattern) - len(predicted))
-
-    total_percentage = sum(p["percentage"] for p in predicted)
-    average = total_percentage / len(predicted) if predicted else 0
-
-    return jsonify({"word": pattern, "score": average, "phonemes": predicted})
-
-
-
-
-
-"""
 @app.route("/api/word/<pattern>", methods=["POST"])
 def validate_phoneme_pattern(pattern: str):   
     recording = request.files['recording']
@@ -161,9 +105,7 @@ def validate_phoneme_pattern(pattern: str):
     average = total_percentage / len(predicted) if predicted else 0
 
     return jsonify({"word": pattern, "score": average, "phonemes": predicted})
-
-
-
+"""
 def validate_phoneme_pattern(pattern: str):   
     recording = request.files['recording']
     # Guardar temporalmente el archivo para inspeccionarlo
@@ -241,15 +183,15 @@ def test(pattern: str):
         file = request.files["recording"]
         res["val"] = file.filename+" : "+file.content_type
         print("res--> ", res)
-        return jsonify({'res': file.filename})
+        return jsonify(res)
     print("res--> ", res)
-    return jsonify({'res': "nada"})
+    return jsonify(res)
 
 
 @app.route('/test/', methods=["OPTIONS"])
-def optionsTest():
+def options():
     print("requestOPTIONS--> ",request)
-    return 'test', 200
+    return '', 200
 
 
 @app.route('/')
