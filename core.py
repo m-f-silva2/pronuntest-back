@@ -81,7 +81,7 @@ class PhonemeRecognitionService:
 
     def predict(self, spectrograms: np.ndarray, type_model: str):
         """Carga el modelo, predice y lo elimina para liberar memoria."""
-        model_path = "./models/phoneme_vocal_model.h5" if type_model == "vocal" else "./models/phoneme_vocal_model.h5"
+        model_path = "./models/phoneme_vocal_model.h5" if type_model == "vocal" else "./models/phoneme_p_model.h5"
 
         try:
             logging.info(f"Cargando modelo {type_model}...")
