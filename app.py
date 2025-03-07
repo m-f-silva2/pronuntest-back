@@ -230,7 +230,7 @@ def test(pattern: str):
 
 
 @app.route('/test/', methods=["OPTIONS"])
-def options():
+def optionsTest():
     print("requestOPTIONS--> ",request)
     return 'test', 200
 
