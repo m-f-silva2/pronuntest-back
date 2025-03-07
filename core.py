@@ -77,27 +77,10 @@ class PhonemeRecognitionService:
     def __new__(cls):
         if cls._instance is None:
             cls._instance = super().__new__(cls)
-            logging.info("Cargando modelos en memoria...")
-            cls._instance._model_vocal = load_model("./models/phoneme_vocal_model.h5")
-            cls._instance._model_p = load_model("./models/phoneme_vocal_model.h5")
         return cls._instance
 
     def predict(self, spectrograms: np.ndarray, type_model: str):
-        model = self._model_vocal if type_model == "vocal" else self._model_p
-        predicts = model.predict(spectrograms, verbose=0)
-
-        return [
-            {"class": phonemes[np.argmax(logits)], "percentage": get_pred_percentage(logits)}
-            for logits in predicts
-        ]
-
-    """def __new__(cls):
-        if cls._instance is None:
-            cls._instance = super().__new__(cls)
-        return cls._instance
-
-    def predict(self, spectrograms: np.ndarray, type_model: str):
-        
+        """Carga el modelo, predice y lo elimina para liberar memoria."""
         model_path = "./models/phoneme_vocal_model.h5" if type_model == "vocal" else "./models/phoneme_p_model.h5"
 
         try:
@@ -120,4 +103,3 @@ class PhonemeRecognitionService:
         except Exception as e:
             logging.error(f"Error al cargar el modelo {type_model}: {e}")
             return {"error": "No se pudo cargar el modelo"}
-    """
