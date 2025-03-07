@@ -61,6 +61,39 @@ def validate_phoneme_pattern(pattern: str):
     recording = request.files['recording']
     type_model = 'vocal' if pattern in ["a", "e", "i", "o", "u"] else 'p'
 
+    # Crear archivo temporal sin que se elimine automáticamente
+    with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as temp_file:
+        temp_path = temp_file.name
+        recording.save(temp_path)
+
+    try:
+        # Ahora sí podemos leerlo sin problemas
+        spectrograms = convert_audio_to_spectrograms(temp_path)
+        predictions = model.predict(spectrograms, type_model)
+    finally:
+        os.remove(temp_path)  # Eliminar el archivo después de usarlo
+
+    phonemes = [p for p in predictions if p["class"] != "noise"]
+    start_pattern = next((i for i, p in enumerate(phonemes) if p["class"] == pattern[0]), None)
+
+    if start_pattern is None:
+        return jsonify({"word": pattern, "score": 0, "phonemes": []})
+
+    predicted = phonemes[start_pattern : start_pattern + len(pattern)]
+    predicted += [{"class": "unknown", "percentage": 0.0}] * (len(pattern) - len(predicted))
+
+    average = sum(p["percentage"] for p in predicted) / len(predicted) if predicted else 0
+
+    return jsonify({"word": pattern, "score": average, "phonemes": predicted})
+
+
+
+"""
+@app.route("/api/word/<pattern>", methods=["POST"])
+def validate_phoneme_pattern(pattern: str):   
+    recording = request.files['recording']
+    type_model = 'vocal' if pattern in ["a", "e", "i", "o", "u"] else 'p'
+
     # Guardar temporalmente el archivo para inspeccionarlo
     temp_file_path = "test_recording.wav"
     recording.save(temp_file_path)
@@ -105,7 +138,9 @@ def validate_phoneme_pattern(pattern: str):
     average = total_percentage / len(predicted) if predicted else 0
 
     return jsonify({"word": pattern, "score": average, "phonemes": predicted})
-"""
+
+
+
 def validate_phoneme_pattern(pattern: str):   
     recording = request.files['recording']
     # Guardar temporalmente el archivo para inspeccionarlo
@@ -214,5 +249,5 @@ if __name__ == "__main__":
     # deploy production
     #app.run(debug=False, host="0.0.0.0")
     #print("Ejecuta con Gunicorn: gunicorn -w 2 -t 60 -b 0.0.0.0:5000 app:app")
-    from waitress import serve  # Alternativa si no quieres usar Gunicorn
-    serve(app, host="0.0.0.0", port=5000)
+    #from waitress import serve  # Alternativa si no quieres usar Gunicorn
+    #serve(app, host="0.0.0.0", port=5000)
