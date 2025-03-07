@@ -85,11 +85,12 @@ class PhonemeRecognitionService:
     def predict(self, spectrograms: np.ndarray, type_model: str):
         model = self._model_vocal if type_model == "vocal" else self._model_p
         predicts = model.predict(spectrograms, verbose=0)
-
-        return [
+        result = [
             {"class": phonemes[np.argmax(logits)], "percentage": get_pred_percentage(logits)}
             for logits in predicts
         ]
+        logging.info("resultados del predict ", result)
+        return result
 
     """def __new__(cls):
         if cls._instance is None:
