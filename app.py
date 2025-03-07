@@ -249,5 +249,5 @@ if __name__ == "__main__":
     # deploy production
     #app.run(debug=False, host="0.0.0.0")
     #print("Ejecuta con Gunicorn: gunicorn -w 2 -t 60 -b 0.0.0.0:5000 app:app")
-    #from waitress import serve  # Alternativa si no quieres usar Gunicorn
-    #serve(app, host="0.0.0.0", port=5000)
+    from waitress import serve  # Alternativa si no quieres usar Gunicorn
+    serve(app, host="0.0.0.0", port=5000)
