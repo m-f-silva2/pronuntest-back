@@ -8,7 +8,7 @@ import os
 import soundfile as sf
 
 app = Flask(__name__)
-CORS(app, resources={r"/*": {"Access-Control-Allow-Origins": "*"}})
+#CORS(app, resources={r"/*": {"Access-Control-Allow-Origins": "*"}})
 #CORS(app, resources={r"/*": {"origins": "*"}})
 #CORS(app, supports_credentials=True, resources={r"/*": {"origins": "*"}}, headers="*")
 CORS(app, resources={r"/*": {"origins": "*"}})
@@ -59,7 +59,7 @@ def process_audio(file_path):
 
 @app.route("/api/word/<pattern>", methods=["POST"])
 def validate_phoneme_pattern(pattern: str):  
-    logging.info("validar fonema ", pattern) 
+    logging.info("validar fonema {pattern}") 
     recording = request.files['recording']
     type_model = 'vocal' if pattern in ["a", "e", "i", "o", "u"] else 'p'
 
@@ -220,9 +220,9 @@ def test(pattern: str):
         file = request.files["recording"]
         res["val"] = file.filename+" : "+file.content_type
         print("res--> ", res)
-        return jsonify({'res': res})
+        return jsonify({'res': file.filename})
     print("res--> ", res)
-    return jsonify({'res': res})
+    return jsonify({'res': "nada"})
 
 
 @app.route('/test/', methods=["OPTIONS"])
