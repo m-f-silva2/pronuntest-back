@@ -1,10 +1,14 @@
 import tempfile
+import logging
 from core import convert_audio_to_spectrograms, PhonemeRecognitionService
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import librosa
 import os
 import soundfile as sf
+
+# Configurar logging
+logging.basicConfig(level=logging.INFO)
 
 app = Flask(__name__)
 #CORS(app, resources={r"/*": {"Access-Control-Allow-Origins": "*"}})
@@ -38,7 +42,7 @@ def most_frequent_phoneme():
     phonemes = list(filter(lambda pred: pred["class"] != "noise", preds))
     preds = phonemes if len(phonemes) > 0 else preds
     phoneme = max(preds, key=lambda x: x["percentage"])
-    print("fonema:",phoneme, flush=True)
+    logging.info("fonema:",phoneme, flush=True)
     return jsonify(
         {
             "pronunciation": "correct",
@@ -69,7 +73,7 @@ def validate_phoneme_pattern(pattern: str):
     # Guardar el audio procesado en un nuevo archivo
     processed_file_path = "processed_recording.wav"
     sf.write(processed_file_path, processed_audio, sample_rate)
-    print(f"Processed audio saved at: {processed_file_path}")
+    logging.info(f"Processed audio saved at: {processed_file_path}")
     try:
         # Procesar el archivo
         spectrograms = convert_audio_to_spectrograms(processed_file_path)
@@ -77,9 +81,11 @@ def validate_phoneme_pattern(pattern: str):
         # Eliminar el archivo temporal
         if os.path.exists(processed_file_path):
             #os.remove(processed_file_path)
-            print(f"Archivo temporal {processed_file_path} eliminado.")
-    
+            logging.info(f"Archivo temporal {processed_file_path} eliminado.")
+    logging.info("predictions ------")
     predictions = model.predict(spectrograms, type_model)
+    logging.info(predictions)
+    logging.info(f"predictions ------")
     phonemes = []
     for prediction in predictions:
         if phonemes and prediction["class"] == phonemes[-1]["class"]:
@@ -172,6 +178,7 @@ def validate_phoneme_pattern(pattern: str):
 
     return jsonify(result)
 """
+
 
     
 @app.route('/test/<pattern>', methods=["POST"])

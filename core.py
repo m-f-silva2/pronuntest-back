@@ -17,8 +17,8 @@ logging.basicConfig(level=logging.INFO)
 SAMPLE_RATE = 22050
 DURATION = 0.2
 TARGET_SAMPLES = int(SAMPLE_RATE * DURATION)
-HOP_LENGTH = 128
-N_FFT = 255
+HOP_LENGTH = 128 #128
+N_FFT = 255 #255
 
 # Clases de predicción
 PHONEMES = [
