@@ -45,6 +45,7 @@ def most_frequent_phoneme():
             "phoneme": phoneme,
         }
     )
+
 def process_audio(file_path):
     # Cargar el audio a su frecuencia original (48,000 Hz)
     audio, sample_rate = librosa.load(file_path, sr=None)
@@ -78,12 +79,7 @@ def validate_phoneme_pattern(pattern: str):
             #os.remove(processed_file_path)
             print(f"Archivo temporal {processed_file_path} eliminado.")
     
-    if(pattern in ["a", "e", "i", "o", "u"]):
-        type_model = 'vocal'
-
     predictions = model.predict(spectrograms, type_model)
-    phoneme = None
-    percentage = 0.0
     phonemes = []
     for prediction in predictions:
         if phonemes and prediction["class"] == phonemes[-1]["class"]:
@@ -92,19 +88,23 @@ def validate_phoneme_pattern(pattern: str):
             phonemes.append(prediction)
 
     phonemes = [p for p in phonemes if p["class"] != "noise"]
-    start_pattern = next((i for i, p in enumerate(phonemes) if p["class"] == pattern[0]), None)
-
+    
+    start_pattern = next(
+        (i for i, p in enumerate(phonemes) if p["class"] == pattern[0]),
+        max(range(len(phonemes)), key=lambda i: phonemes[i]["percentage"], default=None)
+    )
+    
     if start_pattern is None:
         return jsonify({"word": pattern, "score": 0, "phonemes": []})
 
+    
     default_phoneme = {"class": "unknown", "percentage": 0.0}
     predicted = phonemes[start_pattern : start_pattern + len(pattern)]
     predicted += [default_phoneme] * (len(pattern) - len(predicted))
 
-    total_percentage = sum(p["percentage"] for p in predicted)
-    average = total_percentage / len(predicted) if predicted else 0
+    return jsonify({"word": phonemes[start_pattern]['class'], "score": phonemes[start_pattern]['percentage'], "phonemes": [phonemes[start_pattern]]})
 
-    return jsonify({"word": pattern, "score": average, "phonemes": predicted})
+
 """
 def validate_phoneme_pattern(pattern: str):   
     recording = request.files['recording']
@@ -172,7 +172,6 @@ def validate_phoneme_pattern(pattern: str):
 
     return jsonify(result)
 """
-
 
     
 @app.route('/test/<pattern>', methods=["POST"])
